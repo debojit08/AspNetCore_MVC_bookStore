@@ -1,6 +1,9 @@
+using BookStore_App.Data;
+using BookStore_App.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -16,7 +19,16 @@ namespace BookStore_App
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(); //for MVC
+            services.AddDbContext<BookStoreContext>( 
+                options=>options.UseSqlServer("Server=.\\SQLEXPRESS;Database=BookStore;Integrated Security=True;")); //SQL server Database Connection
+#if DEBUG
+            services.AddRazorPages().AddRazorRuntimeCompilation(); // For run time compilation
+#endif
+            services.AddScoped<BookRepository, BookRepository>(); //dependencies injection for book repository and used this dependencies inside the bookController.
+                                                                  // for inserting data you must have to create dependency injection
+
+            services.AddScoped<languageRepo, languageRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,8 +63,9 @@ namespace BookStore_App
 
             });
             */
+            app.UseStaticFiles();
 
-                app.UseRouting();
+             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
@@ -61,7 +74,7 @@ namespace BookStore_App
                   await context.Response.WriteAsync("Hello World!");
                  }); */
 
-                endpoints.MapDefaultControllerRoute();
+                endpoints.MapDefaultControllerRoute(); // data come from the controller
              });
         }
     }
